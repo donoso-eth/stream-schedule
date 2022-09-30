@@ -16,7 +16,6 @@ const config: HardhatUserConfig = {
         blockNumber: 7631671,
       
       },
-      chainId:5
     },
     localhost: {
       url: 'http://localhost:8545',
