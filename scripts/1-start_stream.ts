@@ -9,8 +9,11 @@ async function startStream() {
   let provider = ethers.provider;
 
   const sf = await Framework.create({
-    chainId: 5, // you can also use chainId here instead
-    provider: provider
+    chainId:31337,
+    provider: provider,
+    customSubgraphQueriesEndpoint: 'https://api.thegraph.com/subgraphs/name/superfluid-finance/protocol-v1-mumbai',
+    resolverAddress: '0x3710AB3fDE2B61736B8BB0CE845D6c61F667a78E',
+
   });
 
 

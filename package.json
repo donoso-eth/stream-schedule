@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@gelatonetwork/ops-sdk": "^2.0.7-beta",
-    "@superfluid-finance/sdk-core": "^0.5.6",
+    "@superfluid-finance/sdk-core": "^0.4.2",
     "ethers": "^5.7.1"
   }
 }
