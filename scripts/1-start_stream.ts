@@ -9,7 +9,6 @@ async function startStream() {
   let provider = ethers.provider;
 
   const sf = await Framework.create({
- 
     chainId:31337,
     provider: provider,
     customSubgraphQueriesEndpoint: 'https://api.thegraph.com/subgraphs/name/superfluid-finance/protocol-v1-goerli',
@@ -20,14 +19,23 @@ async function startStream() {
 
   try {
 
- 
-    const privKeyDEPLOYER = process.env['DEPLOYER_KEY'] as BytesLike;
-    const deployer_wallet = new Wallet(privKeyDEPLOYER);
-    const deployer = await deployer_wallet.connect(provider);
+    const accounts = await ethers.getSigners(); // This returns an array of the default signers connected to the hre's ethers instance
+    const deployer = accounts[0];
+    const user1 = accounts[1];
+    const user2 = accounts[2];
 
-    const privKeyUSER = process.env['USER1_KEY'] as BytesLike;
-    const user_wallet = new Wallet(privKeyUSER);
-    const user1 = await user_wallet.connect(provider);
+
+    // const privKeyDEPLOYER = process.env['DEPLOYER_KEY'] as BytesLike;
+    // const deployer_wallet = new Wallet(privKeyDEPLOYER);
+    // const deployer = await deployer_wallet.connect(provider);
+
+    
+
+
+
+    // const privKeyUSER = process.env['USER1_KEY'] as BytesLike;
+    // const user_wallet = new Wallet(privKeyUSER);
+    // const user1 = await user_wallet.connect(provider);
 
     let flowRate = '3858024691358';
 

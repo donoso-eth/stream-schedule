@@ -1,11 +1,12 @@
 import { Framework, Host, normalizeAddress } from "@superfluid-finance/sdk-core";
-import { ethers } from "hardhat";
+import { ethers, network } from "hardhat";
 import * as dotenv from 'dotenv';
-import { BytesLike, Contract, Wallet } from "ethers";
+import { BytesLike, Contract, utils, Wallet } from "ethers";
 import { HOST_ABI } from "../data/host_abi";
 import { CASH_AGREEMENT_ABI } from "../data/cashFlow_abi";
-import { GelatoOpsSDK, TaskTransaction } from "@gelatonetwork/ops-sdk";
-
+import { GelatoOpsSDK, Module, ModuleData, TaskTransaction } from "@gelatonetwork/ops-sdk";
+import { IOps__factory } from "../typechain-types/factories/IOps__factory";
+const ETH = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 
 dotenv.config();
 
@@ -38,7 +39,7 @@ async function stopStream() {
   let superToken = "0xF2d68898557cCb2Cf4C10c3Ef2B034b2a69DAD00";
 
   let gelato ="0xc1C6805B857Bef1f412519C4A842522431aFed39"
-gelato = "0x683913B3A32ada4F8100458A3E1675425BdAa7DF"
+let gelatoExec = "0x683913B3A32ada4F8100458A3E1675425BdAa7DF"
 
   try {
 
@@ -71,27 +72,85 @@ gelato = "0x683913B3A32ada4F8100458A3E1675425BdAa7DF"
     const params =  [cfa,cfaCallData,"0x"] ;
     const action = 'callAgreement';
     const unsignedTx = await  hostContract.populateTransaction[action](...params);
-    let tx = await deployer.sendTransaction(unsignedTx);
+     let tx = await deployer.sendTransaction(unsignedTx);
 
 
     //let tx = await deployer.sendTransaction({data:hostCallData})
-   // await tx.wait()
+     await tx.wait()
+
+throw new Error("");
+
+   
       let execData = hostCallData;
       let execAddress = host;
       let startTime = +((new Date().getTime()/1000).toFixed(0))+ 300;
-
+      let execSelector = hostContract.interface.getSighash(
+        'callAgreement(address,bytes,bytes)'
+      );
       // const  { taskId, tx }: TaskTransaction = await gelatoOps.createTask({
       //   execAddress,
-      //   execSelector: hostInterface.getSighash("callAgreement(address,bytes,bytes)"),
+      //   execSelector,
       //   execData,
       //   name: "Automated stip stream",
       //   dedicatedMsgSender:false,
       //   useTreasury:false,
+      //   singleExec:true
       // });
     
-      //   console.log(taskId)
+      await network.provider.request({
+        method: 'hardhat_impersonateAccount',
+        params: [gelatoExec],
+      });
+  
+      let executor = await ethers.provider.getSigner(gelatoExec);
+
+      await network.provider.request({
+        method: 'hardhat_impersonateAccount',
+        params: [gelato],
+      });
+
+      let gelatoOps = await ethers.provider.getSigner(gelato);
+
+        tx = await gelatoOps.sendTransaction(unsignedTx);
+
+
+      let ops = IOps__factory.connect(gelato, deployer);
+
+throw('');
+
+      console.log('JUAJAJAJAJ')
+
+      let fee = utils.parseEther("0.1")
+      const moduleData: ModuleData = {
+        modules: [Module.SINGLE_EXEC],
+        args: ["0x"]}
+
+       tx = await   ops["createTask(address,bytes,(uint8[],bytes[]),address)"](host,execSelector,moduleData,ETH)
+
+
 
        await tx.wait()
+
+
+ 
+       ops = IOps__factory.connect(gelato, executor);
+   
+   
+   
+        
+
+   
+      //  let id = utils.keccak256(
+      //    new utils.AbiCoder().encode(
+      //      ['address', 'address', 'bytes4', 'bool', 'address', 'bytes32'],
+      //      [floowdyAddress, floowdyAddress, execSelector, false, ETH, resolverHash]
+      //    )
+      //  );
+   
+
+
+       await   ops.connect(executor).exec(deployer.address,host,execData,moduleData,fee,ETH,false,true)
+
 
   
     //console.log(tx)
